@@ -1,12 +1,11 @@
-def print_header():
-    print("-" * 30)
-    print("OUTIL DE MONITORING SYSTEME")
-    print("-" * 30)
-
 def check_anomalies(cpu, ram, disk):
-    """Identifie les anomalies de performance[cite: 6, 47]."""
+    """Analyse les données pour identifier les surcharges[cite: 45, 47]."""
     anomalies = []
     if cpu > 80: anomalies.append("Surcharge CPU")
-    if ram > 90: anomalies.append("RAM saturée")
-    if disk > 95: anomalies.append("Disque plein")
+    if ram > 85: anomalies.append("RAM saturée")
+    if disk > 90: anomalies.append("Disque plein")
     return anomalies
+
+def print_status(data):
+    """Affiche un résumé simple dans la console pour le suivi en temps réel."""
+    print(f"--- Stats : CPU {data['cpu']}% | RAM {data['ram']}% | DISK {data['disk']}% ---")
