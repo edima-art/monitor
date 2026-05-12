@@ -1,29 +1,26 @@
 from datetime import datetime
 
-def generate_report(cpu, ram, disk, cpu_threshold=80, disk_threshold=90):
-    """Crée un fichier rapport texte lisible[cite: 92]."""
-    date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def write_report(data):
+    """Génère un rapport textuel exploitable[cite: 7, 29]."""
+    date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    cpu_status = "critique" if cpu > cpu_threshold else "normal"
-    ram_status = "critique" if ram > 85 else "normal"  # Seuil RAM arbitraire
-    disk_status = "critique" if disk > disk_threshold else "normal"
+    # Définition des statuts [cite: 47]
+    c_status = "critique" if data["cpu"] > 80 else "normal"
+    r_status = "critique" if data["ram"] > 85 else "normal"
+    d_status = "critique" if data["disk"] > 90 else "normal"
 
-    report_content = f"""===== RAPPORT SYSTEME =====
-Date: {date_str}
-CPU: {cpu}% ({cpu_status})
-RAM: {ram}% ({ram_status})
-Disque: {disk}% ({disk_status})
+    rapport = f"""===== RAPPORT SYSTEME =====
+Date: {date_now}
+CPU: {data['cpu']}% ({c_status})
+RAM: {data['ram']}% ({r_status})
+Disque: {data['disk']}% ({d_status})
 
 Recommandations:
 """
-    if cpu > cpu_threshold:
-        report_content += "- Vérifier les processus actifs\n"
-    if disk > disk_threshold:
-        report_content += "- Libérer de l'espace disque\n"
-    if cpu_status == "normal" and disk_status == "normal":
-        report_content += "- Aucune action requise.\n"
+    if c_status == "critique": rapport += "- Vérifier les processus actifs\n" [cite: 60]
+    if d_status == "critique": rapport += "- Libérer de l'espace disque\n" [cite: 60]
+    if "critique" not in [c_status, r_status, d_status]: rapport += "- RAS : Système stable\n"
 
-    with open("rapport_systeme.txt", "w") as f:
-        f.write(report_content)
-    
-    print(f"Rapport généré le {date_str}")
+    with open("rapport_systeme.txt", "w", encoding="utf-8") as f:
+        f.write(rapport)
+    print(f"[{date_now}] Rapport mis à jour.")
