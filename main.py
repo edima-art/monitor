@@ -1,32 +1,26 @@
 import time
 import monitor
 import reporter
-import utils
+import utils  
 
-def run_monitoring():
-    utils.print_header()
-    
+def start():
+    print("Démarrage du monitoring SecOps...") [cite: 3]
     try:
-        while True:
+        while True: [cite: 70]
             # 1. Collecte
-            cpu = monitor.get_cpu_usage()
-            ram = monitor.get_ram_usage()
-            disk = monitor.get_disk_usage()
+            data = monitor.get_metrics()
             
-            # 2. Analyse
-            anomalies = utils.check_anomalies(cpu, ram, disk)
+            # 2. Analyse (via utils)
+            anomalies = utils.check_anomalies(data['cpu'], data['ram'], data['disk'])
+            utils.print_status(data)
+            
             if anomalies:
-                print(f"ALERTE : {', '.join(anomalies)}")
+                print(f"ATTENTION : {', '.join(anomalies)}") [cite: 47]
             
             # 3. Rapport
-            reporter.generate_report(cpu, ram, disk)
+            reporter.write_report(data)
             
-            # 4. Attente (60 secondes) [cite: 72]
-            print("En attente du prochain cycle...")
+            # 4. Pause [cite: 72]
             time.sleep(60)
-            
     except KeyboardInterrupt:
-        print("\nArrêt du monitoring.")
-
-if __name__ == "__main__":
-    run_monitoring()
+        print("\nArrêt de l'outil.")
