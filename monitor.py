@@ -1,42 +1,23 @@
 import subprocess
 import shutil
-import os
 
-def get_cpu_usage():
-    """Récupère l'utilisation CPU via WMIC (Windows)."""
+def get_metrics():
+    """Récupère les métriques système de base sous Windows."""
+    metrics = {"cpu": 0.0, "ram": 0.0, "disk": 0.0}
     try:
-        # Utilisation de r"" (raw string) pour éviter le SyntaxWarning sur les antislashs
-        cmd = "wmic cpu get loadpercentage"
-        output = subprocess.check_output(cmd, shell=True).decode().split()
-        # La sortie de wmic est typiquement ['LoadPercentage', 'valeur']
-        if len(output) >= 2:
-            return float(output[1])
-        return 0.0
-    except Exception:
-        return 0.0
+        # CPU : Pourcentage de charge [cite: 39]
+        cpu_out = subprocess.check_output("wmic cpu get loadpercentage", shell=True).decode().split()
+        if len(cpu_out) >= 2: metrics["cpu"] = float(cpu_out[1])
 
-def get_ram_usage():
-    """Récupère l'utilisation RAM via WMIC (Windows)."""
-    try:
-        # Récupère la mémoire totale et libre en Ko
-        cmd_total = "wmic computersystem get totalphysicalmemory"
-        cmd_free = "wmic os get freephysicalmemory"
-        
-        total = int(subprocess.check_output(cmd_total, shell=True).decode().split()[1]) / 1024
-        free = int(subprocess.check_output(cmd_free, shell=True).decode().split()[1])
-        
-        used_percent = ((total - free) / total) * 100
-        return round(used_percent, 2)
-    except Exception:
-        return 0.0
+        # RAM : Pourcentage d'utilisation [cite: 40]
+        ram_free = int(subprocess.check_output("wmic os get freephysicalmemory", shell=True).decode().split()[1])
+        ram_total = int(subprocess.check_output("wmic computersystem get totalphysicalmemory", shell=True).decode().split()[1]) / 1024
+        metrics["ram"] = round(((ram_total - ram_free) / ram_total) * 100, 2)
 
-def get_disk_usage():
-    """Récupère l'espace disque de la racine (C:) via shutil."""
-    try:
-        # Sous Windows, on cible généralement le lecteur C:
-        stat = shutil.disk_usage("C:")
-        return round((stat.used / stat.total) * 100, 2)
-    except Exception:
-        # Repli sur le répertoire courant si C: n'est pas accessible
-        stat = shutil.disk_usage(os.getcwd())
-        return round((stat.used / stat.total) * 100, 2)
+        # Disque : Pourcentage utilisé sur C: [cite: 41]
+        du = shutil.disk_usage("C:")
+        metrics["disk"] = round((du.used / du.total) * 100, 2)
+    except Exception as e:
+        print(f"Erreur de lecture : {e}")
+    
+    return metrics
